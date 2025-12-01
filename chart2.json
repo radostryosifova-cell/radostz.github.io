@@ -1,0 +1,179 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 500,
+  "height": 400,
+  "background": "#fbf5e9",
+
+  "title": {
+    "text": "The workers vs. the owners",
+    "subtitle": [
+      "Since 2021, stock market gains have accelerated far beyond wage growth, widening the gap between asset owners and workers.",
+      "(Jan 2021 = 0%)",
+      ""
+    ],
+    "anchor": "start",
+    "font": "Merriweather",
+    "fontSize": 24,
+    "fontWeight": "bold",
+    "color": "#111111",
+    "subtitleFont": "Merriweather",
+    "subtitleFontSize": 12,
+    "subtitleFontWeight": 300,
+    "subtitleColor": "#444444",
+    "subtitleLineHeight": 18
+  },
+
+  "data": {
+    "url": "https://raw.githubusercontent.com/radostryosifova-cell/radostz.github.io/refs/heads/main/sp500_ahe_monthly.csv",
+    "format": { "type": "csv" }
+  },
+
+  "transform": [
+    { "calculate": "toDate(datum.observation_date)", "as": "Date" },
+
+    {
+      "fold": [
+        "ahe_total_private",
+        "sp500_monthly_max"
+      ],
+      "as": ["Series", "Value"]
+    },
+
+    {
+      "calculate": "datum.Series == 'ahe_total_private' ? 'Wage growth' : 'S&P 500 growth'",
+      "as": "SeriesLabel"
+    },
+
+    {
+      "window": [
+        { "op": "first_value", "field": "Value", "as": "BaseValue" }
+      ],
+      "groupby": ["Series"],
+      "sort": [{ "field": "Date", "order": "ascending" }]
+    },
+
+    {
+      "calculate": "(datum.Value / datum.BaseValue - 1)",
+      "as": "GrowthPct"
+    }
+  ],
+
+  "layer": [
+    {
+      "mark": {
+        "type": "line",
+        "strokeWidth": 3
+      },
+      "encoding": {
+        "x": {
+          "field": "Date",
+          "type": "temporal",
+          "axis": {
+            "title": "Year",
+            "labelFont": "Merriweather",
+            "titleFont": "Merriweather",
+            "format": "%Y",
+            "tickCount": "year"
+          }
+        },
+        "y": {
+          "field": "GrowthPct",
+          "type": "quantitative",
+          "axis": {
+            "title": null,
+              "labelExpr": "format(datum.value, '0.0%')",
+            "labelFont": "Merriweather",
+            "format": ".0f"
+          }
+        },
+        "color": {
+          "field": "SeriesLabel",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Wage growth", "S&P 500 growth"],
+            "range": ["#4b8b3b", "#111111"]
+          },
+          "legend": {
+            "title": null,
+            "labelFont": "Merriweather",
+            "orient": "top-left",
+            "symbolType": "stroke",
+            "symbolSize": 80
+          }
+        }
+      }
+    },
+
+    {
+      "transform": [
+        {
+          "window": [
+            { "op": "max", "field": "Date", "as": "MaxDate" }
+          ],
+          "groupby": ["SeriesLabel"]
+        },
+        {
+          "filter": "datum.Date == toDate('2025-09-01')"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "font": "Merriweather",
+        "fontSize": 11,
+        "dx": 13,
+        "dy": -2
+      },
+      "encoding": {
+        "x": { "field": "Date", "type": "temporal" },
+        "y": { "field": "GrowthPct", "type": "quantitative" },
+        "text": {
+          "field": "GrowthPct",
+          "type": "quantitative",
+          "format": ".0%"
+        },
+        "color": {
+          "field": "SeriesLabel",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Wage growth", "S&P 500 growth"],
+            "range": ["#4b8b3b", "#111111"]
+          }
+        }
+      }
+    },
+
+    {
+      "data": {
+        "values": [
+          {
+            "note": ["Source: U.S. Bureau of Labor Statistics,  S&P Dow Jones Indices","Percentage changes have been calculated relative to January 2021 values."]
+          }
+        ]
+      },
+      "mark": {
+        "type": "text",
+        "font": "Merriweather",
+        "fontSize": 11,
+        "align": "left",
+        "baseline": "bottom",
+         "fill": "#777777"
+      },
+      "encoding": {
+        "x": { "value": -20 },
+        "y": { "value": 450 },
+        "text": { "field": "note" }
+      }
+    }
+  ],
+
+  "config": {
+    "view": { "stroke": null },
+    "axis": {
+      "labelFont": "Merriweather",
+      "titleFont": "Merriweather",
+      "labelFontSize": 11,
+      "titleFontSize": 12,
+      "gridColor": "#e0d8c5"
+    }
+  }
+}
