@@ -1,0 +1,156 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 420,
+  "height": 420,
+
+  "title": {
+    "text": "US pay is falling behind costs of living",
+    "subtitle": ["Since 2021, prices for utilities, rent and food have risen much faster than average hourly pay, squeezing household budgets.", "(Jan 2021 = 100)"],
+    "anchor": "start",
+    "font": "Merriweather",
+    "fontSize": 22,
+    "fontWeight": "bold",
+    "color": "#111111",
+    "subtitleFont": "Merriweather",
+    "subtitleFontSize": 11,
+    "subtitleFontWeight": "300",
+    "subtitleColor": "#444444",
+    "subtitleLineHeight": 14,
+    "subtitlePadding": 6
+  },
+
+  "data": {
+    "url": "https://raw.githubusercontent.com/radostryosifova-cell/radostz.github.io/refs/heads/main/CPIandearningsdata.csv",
+    "format": {"type": "csv"}
+  },
+
+  "transform": [
+    { "calculate": "toDate(datum.Date)", "as": "Date" },
+
+    { "calculate": "datum.Earnings  / 30.04   * 100", "as": "EarningsIdx" },
+    { "calculate": "datum.Food      / 252.107 * 100", "as": "FoodIdx" },
+    { "calculate": "datum.Rent      / 344.469 * 100", "as": "RentIdx" },
+    { "calculate": "datum.Utilities / 248.879 * 100", "as": "UtilitiesIdx" },
+
+    {
+      "fold": ["EarningsIdx", "FoodIdx", "RentIdx", "UtilitiesIdx"],
+      "as": ["Series", "Index"]
+    },
+    {
+      "calculate": "datum.Series=='EarningsIdx' ? 'Hourly pay' : datum.Series=='FoodIdx' ? 'Groceries' : datum.Series=='RentIdx' ? 'Rent' : 'Utilities & energy'",
+      "as": "Label"
+    }
+  ],
+
+  "layer": [
+    {
+      "mark": {"type": "line"},
+      "encoding": {
+        "x": {
+          "field": "Date",
+          "type": "temporal",
+          "title": "Year",
+          "axis": {"format": "%Y", "tickCount": "year", "labelAngle": 0}
+        },
+        "y": {
+          "field": "Index",
+          "type": "quantitative",
+          "title": "Change in Prices and Pay",
+          "scale": {"domain": [100, 140]}
+        },
+        "color": {
+          "field": "Label",
+          "type": "nominal",
+          "title": null,
+          "scale": {
+            "domain": ["Hourly pay", "Groceries", "Rent", "Utilities & energy"],
+            "range": ["#003f5c", "#ffa600", "#7a5195", "#ef5675"]
+          },
+          "legend": {
+            "orient": "top-left",
+            "direction": "vertical",
+            "labelFontSize": 10,
+            "symbolType": "square",
+            "symbolSize": 70,
+            "symbolStrokeWidth": 0,
+            "padding": 4
+          }
+        },
+        "strokeWidth": {
+          "condition": {"test": "datum.Label == 'Hourly pay'", "value": 3},
+          "value": 2
+        }
+      }
+    },
+
+    {
+      "transform": [
+        {
+          "window": [{"op": "row_number", "as": "rank"}],
+          "sort": [{"field": "Date", "order": "descending"}],
+          "groupby": ["Label"]
+        },
+        {"filter": "datum.rank == 1"}
+      ],
+      "mark": {
+        "type": "text",
+        "dx": 4,
+        "dy": -4,
+        "fontSize": 11,
+        "align": "left",
+        "baseline": "middle"
+      },
+      "encoding": {
+        "x": {"field": "Date", "type": "temporal"},
+        "y": {"field": "Index", "type": "quantitative"},
+        "text": {"field": "Label"},
+        "color": {
+          "field": "Label",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Hourly pay", "Groceries", "Rent", "Utilities & energy"],
+            "range": ["#003f5c", "#ffa600", "#7a5195", "#ef5675"]
+          },
+          "legend": null
+        }
+      }
+    },
+
+    {
+      "data": {
+        "values": [
+          {
+            "note": "Source: U.S. Bureau of Labor Statistics \nEach series is rebased so that January 2021 = 100, with later values scaled in proportion to their January 2021 level."
+          }
+        ]
+      },
+      "mark": {
+        "type": "text",
+        "fontSize": 9,
+        "align": "left",
+        "baseline": "bottom",
+        "fill": "#777777",
+        "lineBreak": "\n"
+      },
+      "encoding": {
+        "x": {"value": 0},
+        "y": {"value": 455},
+        "text": {"field": "note"}
+      }
+    }
+  ],
+
+  "config": {
+    "background": "#f7f3e9",
+    "axis": {
+      "grid": true,
+      "gridColor": "#e0ddd5",
+      "domainColor": "#888",
+      "tickColor": "#888",
+      "labelFontSize": 10,
+      "titleFontSize": 11,
+      "labelFont": "Merriweather",
+      "titleFont": "Merriweather"
+    }
+  }
+}
