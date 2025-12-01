@@ -1,11 +1,11 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "width": 420,
+  "width": 450,
   "height": 420,
 
   "title": {
     "text": "US pay is falling behind costs of living",
-    "subtitle": ["Since 2021, prices for utilities, rent and food have risen much faster than average hourly pay, squeezing household budgets.", "(Jan 2021 = 100)"],
+    "subtitle": ["Since 2021, prices for utilities, rent and food have risen much faster than average hourly pay, squeezing household budgets.", "(Jan 2021 = 100)",""],
     "anchor": "start",
     "font": "Merriweather",
     "fontSize": 22,
@@ -120,7 +120,7 @@
       "data": {
         "values": [
           {
-            "note": "Source: U.S. Bureau of Labor Statistics \nEach series is rebased so that January 2021 = 100, with later values scaled in proportion to their January 2021 level."
+            "note": "Source: U.S. Bureau of Labor Statistics \nEach series is turned into an index by fixing Jan 2021 = 100, later data points are scaled relative to that starting point."
           }
         ]
       },
@@ -133,8 +133,8 @@
         "lineBreak": "\n"
       },
       "encoding": {
-        "x": {"value": 0},
-        "y": {"value": 455},
+        "x": {"value": -30},
+        "y": {"value": 460},
         "text": {"field": "note"}
       }
     }
